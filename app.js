@@ -28,6 +28,9 @@ const client = new vision.ImageAnnotatorClient();
 app.get('/', (req, res) => {
     res.render('index'); // Ensure "index.ejs" is in the "views" folder
 });
+app.get('/admin', (req, res) => {
+    res.render('admin'); // Ensure "index.ejs" is in the "views" folder
+});
 
 // Upload Route
 app.post('/api/upload', upload.single('photo'), async (req, res) => {
