@@ -1,7 +1,8 @@
 const express = require('express');
 const path = require('path');
 const multer = require('multer');
-require('dotenv').config(); // Load environment variables
+require('dotenv').config();
+// Load environment variables
 const vision = require('@google-cloud/vision');
 const bodyParser = require('body-parser');
 const Post = require('./models/post'); // Assuming Post model exists
@@ -24,7 +25,7 @@ const upload = multer({ dest: 'uploads/' }); // Temporary storage for the upload
 const client = new vision.ImageAnnotatorClient();
 
 // MongoDB connection setup
-mongoose.connect(process.env.MONGODB_URI, {
+mongoose.connect(process.env.DB_CONNECTION_STRING, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })

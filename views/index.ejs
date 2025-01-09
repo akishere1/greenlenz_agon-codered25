@@ -34,30 +34,17 @@
     </div>
 
     <script>
-<<<<<<< HEAD
-        // Open modal when "+" button is clicked
-        document.getElementById('takePhoto').addEventListener('click', function () {
-            document.getElementById('photoModal').style.display = 'block';
-        });
-
-        // Close modal
-=======
         // Open photo modal
         document.getElementById('addPhoto').addEventListener('click', function () {
             document.getElementById('photoModal').style.display = 'block';
         });
 
         // Close photo modal
->>>>>>> 1a15396f3d701822c3122a9edc431d340a26cc26
         document.getElementById('closeModal').addEventListener('click', function () {
             document.getElementById('photoModal').style.display = 'none';
         });
 
-<<<<<<< HEAD
-        // Handle photo upload (optional at this stage)
-=======
         // Handle photo upload with geolocation
->>>>>>> 1a15396f3d701822c3122a9edc431d340a26cc26
         document.getElementById('uploadBtn').addEventListener('click', function () {
             const photoInput = document.getElementById('photoInput');
             const description = document.getElementById('photoDescription').value;
@@ -74,25 +61,6 @@
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
 
-<<<<<<< HEAD
-            // Send to backend using fetch (can be implemented later)
-            fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    alert('Image uploaded successfully');
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error uploading image:', error);
-                alert('Upload failed');
-            });
-=======
                     // Prepare FormData with photo, description, and location
                     const formData = new FormData();
                     formData.append('photo', photo);
@@ -123,7 +91,6 @@
             } else {
                 alert('Geolocation is not supported by this browser.');
             }
->>>>>>> 1a15396f3d701822c3122a9edc431d340a26cc26
         });
     </script>
 
