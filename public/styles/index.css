@@ -9,12 +9,12 @@ body {
 
 /* Header */
 .header {
-    position: absolute;
+    /* position: absolute; */
     display: flex;
     width: 100%;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 20px 20px;
     background-color: #ffffff; /* New style header background color */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 }
@@ -23,7 +23,8 @@ body {
     font-size: 1.5rem;
     font-weight: bold;
     color: #333; /* New style logo color */
-    mar
+    margin-right: 290px;
+    margin-bottom: 10px;
 }
 
 .nav {
@@ -31,7 +32,7 @@ body {
     align-items: center;
     gap: 20px;
     position: absolute;
-    padding: 10px;
+    /* padding: 10px; */padding-left: 45px;
 }
 
 .nav a {
@@ -61,6 +62,7 @@ body {
 /* Main Content */
 .container {
     padding: 20px;
+    margin-left: 30px;
 }
 
 .posts-container {
@@ -107,9 +109,8 @@ body {
 
 /* Footer */
 footer {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
+  
+  
 }
 
 .add-photo {

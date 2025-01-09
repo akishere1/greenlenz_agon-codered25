@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="../public/styles/admin.css">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">GreenLenz Admin</div>
+        <nav class="nav">
+            <a href="/logout">Logout</a>
+        </nav>
+    </header>
+
+    <main class="dashboard-container">
+        <h1>Welcome, Admin</h1>
+        <section class="stats-container">
+            <div class="stat-box">
+                <h2>Total Reports</h2>
+                <p id="totalReports">0</p>
+            </div>
+            <div class="stat-box">
+                <h2>Pending Reports</h2>
+                <p id="pendingReports">0</p>
+            </div>
+            <div class="stat-box">
+                <h2>Resolved Reports</h2>
+                <p id="resolvedReports">0</p>
+            </div>
+        </section>
+
+        <section class="report-list">
+            <h2>Latest Reports</h2>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Report ID</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="reportRows">
+                    <!-- Dynamic content will be added here -->
+                    <tr>
+                        <td>12345</td>
+                        <td>Trash near park</td>
+                        <td>Pending</td>
+                        <td>
+                            <button class="resolve-btn">Resolve</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>

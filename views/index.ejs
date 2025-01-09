@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trash Reporter</title>
-    <link rel="stylesheet" href="styles/index.css">
+    <link rel="stylesheet" href="styles/index">
 </head>
 <body>
     <header class="header">
@@ -19,13 +19,7 @@
     <main class="container">
         <div id="postSection" class="posts-container"></div>
     </main>
-
-    <footer>
-        <div class="add-photo" id="addPhoto">
-            <span class="plus-icon">+</span>
-        </div>
-    </footer>
-
+    
     <!-- Modal for taking photo -->
     <div id="photoModal" class="modal">
         <div class="modal-content">
@@ -35,6 +29,12 @@
             <button id="uploadBtn">Upload Photo</button>
         </div>
     </div>
+    
+        <footer>
+            <div class="add-photo" id="addPhoto">
+                <span class="plus-icon">+</span>
+            </div>
+        </footer>
 
     <script src="scripts/photos.js" defer></script>
 </body>
