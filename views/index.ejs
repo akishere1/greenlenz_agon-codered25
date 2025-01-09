@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trash Reporter</title>
-    <link rel="stylesheet" href="../styles/index.css">
+    <link rel="stylesheet" href="/styles/index.css">
 </head>
 <body>
     <header class="header">
@@ -29,14 +29,17 @@
     </div>
 
     <script>
+        // Open photo modal
         document.getElementById('addPhoto').addEventListener('click', function () {
             document.getElementById('photoModal').style.display = 'block';
         });
 
+        // Close photo modal
         document.getElementById('closeModal').addEventListener('click', function () {
             document.getElementById('photoModal').style.display = 'none';
         });
 
+        // Handle photo upload with geolocation
         document.getElementById('uploadBtn').addEventListener('click', function () {
             const photoInput = document.getElementById('photoInput');
             const description = document.getElementById('photoDescription').value;
@@ -47,29 +50,42 @@
                 return;
             }
 
-            // Prepare form data
-            const formData = new FormData();
-            formData.append('photo', photo);
-            formData.append('description', description);
+            // Get geolocation (latitude and longitude)
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
 
-            // Send to backend using fetch
-            fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    alert('Image uploaded successfully');
-                    // Optionally, display the image or reload the posts section
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error uploading image:', error);
-                alert('Upload failed');
-            });
+                    // Prepare FormData with photo, description, and location
+                    const formData = new FormData();
+                    formData.append('photo', photo);
+                    formData.append('description', description);
+                    formData.append('location', JSON.stringify({ latitude, longitude }));
+
+                    // Send the data to the backend (Express route)
+                    fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            alert('Image uploaded successfully');
+                            // Optionally, reload the posts or display the uploaded image
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error uploading image:', error);
+                        alert('Upload failed');
+                    });
+                }, function(error) {
+                    alert('Geolocation error: ' + error.message);
+                });
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
         });
     </script>
 

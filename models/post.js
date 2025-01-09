@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 // Define the schema for posts
 const postSchema = new mongoose.Schema({
@@ -22,7 +23,14 @@ const postSchema = new mongoose.Schema({
         type: Date, 
         default: Date.now // Automatically set to the current date
     },
-});
+    location: { // Added geolocation field
+        type: { type: String, default: 'Point' },
+        coordinates: [Number], // Store [longitude, latitude]
+    },
+}, { timestamps: true });
+
+// Create a geospatial index for efficient querying
+postSchema.index({ location: '2dsphere' });
 
 // Create and export the Post model
 module.exports = mongoose.model('Post', postSchema);
