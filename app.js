@@ -2,34 +2,29 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const multer = require('multer');
-const fs = require('fs'); // Optional for file system operations
+require('dotenv').config(); // Load environment variables
 
-const User = require('./models/user'); // Your user model
-const Post = require('./models/post'); // Your post model
+const User = require('./models/user'); // User model
+const Post = require('./models/post'); // Post model
 
 const app = express();
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public'))); // Serve static files
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // File Upload Middleware
 const upload = multer({
-    dest: 'uploads/', // Destination folder for uploaded files
+    dest: path.join(__dirname, 'uploads'), // Destination folder for uploads
     limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
 });
 
-// Import Routes
-const authRoutes = require('./routes/auth');
-
-// Use Routes
-app.use('/auth', authRoutes);
-
 // Routes
 app.get('/', (req, res) => {
-    res.render('index'); // Render home or landing page
+    res.render('index'); // Render homepage
 });
 
 app.get('/signin', (req, res) => {
@@ -40,46 +35,57 @@ app.get('/signup', (req, res) => {
     res.render('signup'); // Render signup page
 });
 
-// Handle File Uploads
-app.post('/api/upload', upload.single('photo'), async (req, res) => {
+// Upload Route
+app.post('/api/upload', upload.single('photo'), async (req, res, next) => {
     try {
-        const { description } = req.body;
+        const { userId, description } = req.body; // User ID and description
         const photo = req.file;
 
-        if (!photo || !description) {
-            return res.status(400).json({ error: 'Photo and description are required.' });
+        if (!photo || !userId) {
+            return res.status(400).json({ error: 'Photo and user ID are required.' });
         }
 
-        console.log('Uploaded file:', photo);
-        console.log('Description:', description);
+        // Validate user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
 
-        // Save metadata to the database (if required)
+        // Save post to database
         const post = new Post({
-            imagePath: photo.path, // Save the file path in your database
-            description: description,
+            image: photo.path, // Save file path
+            user: user._id, // Reference user
+            comment: description || '', // Optional description
         });
 
         await post.save();
 
-        // Respond with success
-        res.status(200).json({
+        res.status(201).json({
             message: 'Photo uploaded successfully!',
-            photoUrl: `/uploads/${photo.filename}`, // Example public URL
+            post: {
+                id: post._id,
+                image: post.image,
+                user: post.user,
+                comment: post.comment,
+            },
         });
     } catch (error) {
         console.error('Error uploading file:', error);
-        res.status(500).json({ error: 'An error occurred while uploading the file.' });
+        next(error);
     }
 });
 
 // Serve Uploaded Files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Server Start
-const PORT = 8080;
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error('Global Error Handler:', err.stack);
+    res.status(500).json({ error: 'Internal Server Error', details: err.message });
+});
+
+// Server
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
-
-
-     
