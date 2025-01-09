@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-require('dotenv').config(); 
 
 // MongoDB Atlas connection string
 // const connectionString = process.env.DB_CONNECTION_STRING || 'mongodb+srv://tryhariomsk:5zmmGkYobOq1RxBS@cluster0.jas61.mongodb.net/?retryWrites=true&w=majority';
