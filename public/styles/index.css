@@ -38,6 +38,16 @@ body {
 .add-photo {
     background-color: lightgreen;
     color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+/* Footer */
+
+.add-photo {
+    background-color: lightgreen; /* New style */
     border-radius: 50%;
     width: 60px;
     height: 60px;

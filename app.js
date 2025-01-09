@@ -1,12 +1,11 @@
 const express = require('express');
 const path = require('path');
 const multer = require('multer');
-require('dotenv').config(); // Load environment variables first
+require('dotenv').config(); // Load environment variables
 const vision = require('@google-cloud/vision');
 const bodyParser = require('body-parser');
-const User = require('./models/user'); // Assuming you have this model
-const Post = require('./models/post'); // Assuming you have this model
-
+const Post = require('./models/post'); // Assuming Post model exists
+const mongoose = require('mongoose');
 const app = express();
 
 // Set up EJS as the template engine
@@ -24,20 +23,35 @@ const upload = multer({ dest: 'uploads/' }); // Temporary storage for the upload
 // Google Vision API client setup
 const client = new vision.ImageAnnotatorClient();
 
+// MongoDB connection setup
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((error) => {
+    console.error('Error connecting to MongoDB:', error);
+  });
+
 // Root Route (Render the EJS template for the home page)
 app.get('/', (req, res) => {
     res.render('index'); // Ensure "index.ejs" is in the "views" folder
 });
 
-// Upload Route
+// Upload Route (Geolocation and Vision AI)
 app.post('/api/upload', upload.single('photo'), async (req, res) => {
     try {
-        const { description } = req.body;
+        const { description, location } = req.body;
         const photo = req.file;
 
-        if (!photo) {
-            return res.status(400).json({ error: 'Photo is required.' });
+        if (!photo || !description || !location) {
+            return res.status(400).json({ error: 'Photo, description, and location are required.' });
         }
+
+        // Parse the location data (Expected: { latitude, longitude })
+        const locationData = JSON.parse(location); 
 
         // Send the image to the Vision AI for analysis
         const [result] = await client.labelDetection(photo.path);
@@ -50,6 +64,10 @@ app.post('/api/upload', upload.single('photo'), async (req, res) => {
         const post = new Post({
             image: photo.path, // Save file path (You may choose to store it in a CDN or another location)
             comment: description || '',
+            location: {
+                type: 'Point',
+                coordinates: [locationData.longitude, locationData.latitude], // Store coordinates [longitude, latitude]
+            },
             analysis: analysisResult, // Add AI analysis result
         });
 
