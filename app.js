@@ -3,6 +3,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const fs = require('fs'); // Optional for file system operations
+const mongoose = require('./models/user'); 
 
 const User = require('./models/user'); // Your user model
 const Post = require('./models/post'); // Your post model
