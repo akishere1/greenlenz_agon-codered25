@@ -41,6 +41,7 @@ app.get('/signup', (req, res) => {
     res.render('signup'); // Render signup page
 });
 
+
 // Handle File Uploads
 app.post('/api/upload', upload.single('photo'), async (req, res) => {
     try {
