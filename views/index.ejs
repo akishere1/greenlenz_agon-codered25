@@ -4,86 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trash Reporter</title>
-    <link rel="stylesheet" href="../styles/index.css">
+    <link rel="stylesheet" href="styles/index.css">
 </head>
 <body>
     <header class="header">
         <div class="logo">GreenLenz</div>
-        
         <nav class="nav">
-            <a href="/signin">Sign IN</a> <!-- Route to Sign In page -->
-            <a href="/signup">Sign Up</a>  <!-- Route to Sign Up page -->
+            <a href="/signin">Sign In</a>
+            <a href="/signup">Sign Up</a>
         </nav>
     </header>
 
     <main class="container">
-        <!-- Posts and Comment Sections -->
-        <section class="post">
-            <div class="user-info">
-                <div class="avatar">@</div>
-                <div class="username">@username</div>
-            </div>
-            <div class="image-container">
-                <img src="../public/images/demo/WhatsApp Image 2025-01-09 at 6.34.37 PM.jpeg" alt="Trash Image">
-            </div>
-            <div class="comment-section">
-                <textarea placeholder="Add a comment..."></textarea>
-                <div class="due-date">
-                    <label for="date">Due Date:</label>
-                    <input type="date" id="date">
-                </div>
-            </div>
-        </section>
-        
-        <section class="post">
-            <div class="user-info">
-                <div class="avatar">@</div>
-                <div class="username">@username</div>
-            </div>
-            <div class="image-container">
-                <img src="../public/images/demo/WhatsApp Image 2025-01-09 at 6.34.37 PM.jpeg" alt="Trash Image">
-            </div>
-            <div class="comment-section">
-                <textarea placeholder="Add a comment..."></textarea>
-                <div class="due-date">
-                    <label for="date">Due Date:</label>
-                    <input type="date" id="date">
-                </div>
-            </div>
-        </section>
+        <div id="postSection" class="posts-container"></div>
     </main>
 
-    <!-- Footer with Plus Icon -->
     <footer>
         <div class="add-photo" id="addPhoto">
-            <span class="plus-icon">+</span> <!-- Plus Icon -->
+            <span class="plus-icon">+</span>
         </div>
     </footer>
 
     <!-- Modal for taking photo -->
-   
-  <!-- Modal for taking a photo -->
-<div id="photoModal" class="modal">
-    <div class="modal-content">
-        <button id="closeModal" class="close">×</button>
-        <!-- Input to select photo from gallery or camera -->
-        <input type="file" id="photoInput" accept="image/*" capture="camera" />
-        
-        <!-- Preview the image here -->
-        <div class="image-container"></div>
-        
-        <!-- Textarea for the user to add a description -->
-        <div class="description-container">
+    <div id="photoModal" class="modal">
+        <div class="modal-content">
+            <button id="closeModal" class="close">×</button>
+            <input type="file" id="photoInput" accept="image/*" capture="camera" />
             <textarea id="photoDescription" placeholder="Add a description..."></textarea>
+            <button id="uploadBtn">Upload Photo</button>
         </div>
-
-        <!-- Button to upload photo -->
-        <button id="uploadBtn">Upload Photo</button>
     </div>
-</div>
 
-
-
-    <script src="../scripts/photos.js"></script>
+    <script src="scripts/photos.js"></script>
 </body>
 </html>
+
+
