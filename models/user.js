@@ -1,20 +1,17 @@
 const mongoose = require('mongoose');
 
-// MongoDB Atlas connection string
-const uri = 'mongodb+srv://eagonofficial:fa1P9n0Rd76rS0EI@cluster0.t9h2d.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+mongoose.connect('mongodb+srv://eagonofficial:<db_password>@cluster0.t9h2d.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+    ssl: true,
+    sslValidate: true,
+    sslCA: '/path/to/ca.pem'
+  });
+  
 
-// Connect to MongoDB
 mongoose
-    .connect(uri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
+    .connect(connectionString, {
+        dbName: '<database>',
     })
-    .then(() => {
-        console.log('Connected to MongoDB Atlas!');
-    })
-    .catch((err) => {
-        console.error('Error connecting to MongoDB Atlas:', err);
-    });
+    .then(() => console.log('Connected to MongoDB Atlas'))
+    .catch((error) => console.error('Error connecting to MongoDB Atlas:', error));
 
-module.exports = mongoose;
 
