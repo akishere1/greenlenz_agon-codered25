@@ -11,6 +11,7 @@ const app = express();
 // Set up EJS as the template engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware for parsing request bodies
 app.use(bodyParser.urlencoded({ extended: true }));

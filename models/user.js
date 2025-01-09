@@ -1,18 +1,16 @@
 const mongoose = require('mongoose');
 
 // MongoDB Atlas connection string
-// const connectionString = process.env.DB_CONNECTION_STRING || 'mongodb+srv://tryhariomsk:5zmmGkYobOq1RxBS@cluster0.jas61.mongodb.net/?retryWrites=true&w=majority';
-const connectionString = process.env.DB_CONNECTION_STRING || 'mongodb+srv://tryhariomsk:5zmmGkYobOq1RxBS@cluster0.jas61.mongodb.net/?retryWrites=true&w=majority&tls=true';
+const connectionString = process.env.DB_CONNECTION_STRING || 'mongodb+srv://tryhariomsk:5zmmGkYobOq1RxBS@cluster0.jas61.mongodb.net/greenlens?retryWrites=true&w=majority';
 
 mongoose.connect(connectionString, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
   dbName: 'greenlens', // Replace with your database name
-  tlsAllowInvalidCertificates: true, // Disable certificate validation temporarily
+  tls: true, // Enable TLS (SSL) for secure connection
+  tlsAllowInvalidCertificates: false, // Do not disable certificate validation
 })
   .then(() => console.log('Connected to MongoDB Atlas'))
   .catch((error) => console.error('Error connecting to MongoDB Atlas:', error));
-  
+
 // Define a sample schema and model
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -23,6 +21,7 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
+
 
 // // Connect to MongoDB Atlas
 // mongoose.connect(connectionString, {
