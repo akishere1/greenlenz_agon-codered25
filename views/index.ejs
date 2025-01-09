@@ -18,7 +18,12 @@
         <div id="postSection" class="posts-container"></div>
     </main>
     
-    <!-- Modal for taking photo -->
+    <!-- "+" Button for Taking Photo -->
+    <div id="takePhoto" class="add-photo">
+        <span class="plus-icon">+</span>
+    </div>
+
+    <!-- Modal for taking photo (will not be visible until later) -->
     <div id="photoModal" class="modal">
         <div class="modal-content">
             <button id="closeModal" class="close">×</button>
@@ -29,14 +34,17 @@
     </div>
 
     <script>
-        document.getElementById('addPhoto').addEventListener('click', function () {
+        // Open modal when "+" button is clicked
+        document.getElementById('takePhoto').addEventListener('click', function () {
             document.getElementById('photoModal').style.display = 'block';
         });
 
+        // Close modal
         document.getElementById('closeModal').addEventListener('click', function () {
             document.getElementById('photoModal').style.display = 'none';
         });
 
+        // Handle photo upload (optional at this stage)
         document.getElementById('uploadBtn').addEventListener('click', function () {
             const photoInput = document.getElementById('photoInput');
             const description = document.getElementById('photoDescription').value;
@@ -52,7 +60,7 @@
             formData.append('photo', photo);
             formData.append('description', description);
 
-            // Send to backend using fetch
+            // Send to backend using fetch (can be implemented later)
             fetch('/api/upload', {
                 method: 'POST',
                 body: formData
@@ -61,7 +69,6 @@
             .then(data => {
                 if (data.message) {
                     alert('Image uploaded successfully');
-                    // Optionally, display the image or reload the posts section
                 } else {
                     alert('Error: ' + data.error);
                 }
@@ -75,3 +82,5 @@
 
 </body>
 </html>
+
+
