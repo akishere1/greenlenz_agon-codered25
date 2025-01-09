@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trash Reporter</title>
-    <link rel="stylesheet" href="styles/index">
+    <link rel="stylesheet" href="../styles/index.css">
 </head>
 <body>
     <header class="header">
         <div class="logo">GreenLenz</div>
         <nav class="nav">
             <a href="/admin" class="admin-btn">Admin</a>
-            <!-- <a href="/signin">Sign In</a>
-            <a href="/signup">Sign Up</a> -->
         </nav>
     </header>
 
@@ -29,13 +27,51 @@
             <button id="uploadBtn">Upload Photo</button>
         </div>
     </div>
-    
-        <footer>
-            <div class="add-photo" id="addPhoto">
-                <span class="plus-icon">+</span>
-            </div>
-        </footer>
 
-    <script src="scripts/photos.js" defer></script>
+    <script>
+        document.getElementById('addPhoto').addEventListener('click', function () {
+            document.getElementById('photoModal').style.display = 'block';
+        });
+
+        document.getElementById('closeModal').addEventListener('click', function () {
+            document.getElementById('photoModal').style.display = 'none';
+        });
+
+        document.getElementById('uploadBtn').addEventListener('click', function () {
+            const photoInput = document.getElementById('photoInput');
+            const description = document.getElementById('photoDescription').value;
+            const photo = photoInput.files[0];
+
+            if (!photo) {
+                alert('Please select an image');
+                return;
+            }
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('photo', photo);
+            formData.append('description', description);
+
+            // Send to backend using fetch
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert('Image uploaded successfully');
+                    // Optionally, display the image or reload the posts section
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error uploading image:', error);
+                alert('Upload failed');
+            });
+        });
+    </script>
+
 </body>
 </html>

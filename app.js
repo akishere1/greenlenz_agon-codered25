@@ -1,61 +1,55 @@
 const express = require('express');
 const path = require('path');
-const bodyParser = require('body-parser');
 const multer = require('multer');
-require('dotenv').config(); // Load environment variables
-
-const User = require('./models/user'); // User model
-const Post = require('./models/post'); // Post model
+require('dotenv').config(); // Load environment variables first
+const vision = require('@google-cloud/vision');
+const bodyParser = require('body-parser');
+const User = require('./models/user'); // Assuming you have this model
+const Post = require('./models/post'); // Assuming you have this model
 
 const app = express();
 
-// Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public'))); // Serve static files
+// Set up EJS as the template engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// File Upload Middleware
-const upload = multer({
-    dest: path.join(__dirname, 'uploads'), // Destination folder for uploads
-    limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
-});
+// Middleware for parsing request bodies
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
-// Routes
+// Multer setup for file uploads
+const upload = multer({ dest: 'uploads/' }); // Temporary storage for the uploaded file
+
+// Google Vision API client setup
+const client = new vision.ImageAnnotatorClient();
+
+// Root Route (Render the EJS template for the home page)
 app.get('/', (req, res) => {
-    res.render('index'); // Render homepage
-});
-
-app.get('/signin', (req, res) => {
-    res.render('signin'); // Render signin page
-});
-
-app.get('/signup', (req, res) => {
-    res.render('signup'); // Render signup page
+    res.render('index'); // Ensure "index.ejs" is in the "views" folder
 });
 
 // Upload Route
-app.post('/api/upload', upload.single('photo'), async (req, res, next) => {
+app.post('/api/upload', upload.single('photo'), async (req, res) => {
     try {
-        const { userId, description } = req.body; // User ID and description
+        const { description } = req.body;
         const photo = req.file;
 
-        if (!photo || !userId) {
-            return res.status(400).json({ error: 'Photo and user ID are required.' });
+        if (!photo) {
+            return res.status(400).json({ error: 'Photo is required.' });
         }
 
-        // Validate user
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
+        // Send the image to the Vision AI for analysis
+        const [result] = await client.labelDetection(photo.path);
+        const labels = result.labelAnnotations;
 
-        // Save post to database
+        // Prepare image analysis result (labels identified by Vision AI)
+        const analysisResult = labels.map(label => label.description).join(', ');
+
+        // Save post to MongoDB
         const post = new Post({
-            image: photo.path, // Save file path
-            user: user._id, // Reference user
-            comment: description || '', // Optional description
+            image: photo.path, // Save file path (You may choose to store it in a CDN or another location)
+            comment: description || '',
+            analysis: analysisResult, // Add AI analysis result
         });
 
         await post.save();
@@ -65,26 +59,20 @@ app.post('/api/upload', upload.single('photo'), async (req, res, next) => {
             post: {
                 id: post._id,
                 image: post.image,
-                user: post.user,
-                comment: post.comment,
+                description: post.comment,
+                analysis: post.analysis,
             },
         });
     } catch (error) {
         console.error('Error uploading file:', error);
-        next(error);
+        res.status(500).json({ error: 'Failed to process image' });
     }
 });
 
-// Serve Uploaded Files
+// Serve Uploaded Files (static files)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Global Error Handler
-app.use((err, req, res, next) => {
-    console.error('Global Error Handler:', err.stack);
-    res.status(500).json({ error: 'Internal Server Error', details: err.message });
-});
-
-// Server
+// Start the server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
