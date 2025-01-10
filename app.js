@@ -3,7 +3,10 @@ const multer = require('multer');
 const mongoose = require('mongoose');
 const Post = require('./models/post'); // Post model for MongoDB
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
+const { ImageAnnotatorClient } = require('@google-cloud/vision');
+const client = new ImageAnnotatorClient();
 
 const app = express();
 app.use(express.json());
@@ -28,17 +31,19 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
-//
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+
 // Routes
 app.get('/', (req, res) => {
     res.render('index'); // Ensure "index.ejs" is in the "views" folder
 });
 app.get('/admin', (req, res) => {
-    res.render('admin.') // Ensure "index.ejs" is in the "views" folder
+    res.render('admin'); // Ensure "admin.ejs" is in the "views" folder
 });
+
 // 1. Upload Route
 app.post('/api/upload', upload.single('photo'), async (req, res) => {
     try {
@@ -149,8 +154,58 @@ app.delete('/api/posts/:id', async (req, res) => {
     }
 });
 
+// 6. Analyze Photo with Vision AI (No user ID required)
+app.get('/api/analyze/:id', async (req, res) => {
+    try {
+        const postId = req.params.id;
+
+        // Fetch post from MongoDB
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        // Read the image file from the server
+        const imagePath = path.join(__dirname, post.image); // Adjust if your image path is different
+        const imageBuffer = fs.readFileSync(imagePath);
+        const encodedImage = imageBuffer.toString('base64');
+
+        // Send to Vision AI API for analysis
+        const [result] = await client.annotateImage({
+            image: { content: encodedImage },
+            features: [{ type: 'LABEL_DETECTION' }], // You can modify the feature type if needed
+        });
+
+        // Debugging output: Log the Vision AI response for inspection
+        console.log('Vision AI Response:', JSON.stringify(result, null, 2));
+
+        // Handle the API response and check for empty results
+        const labels = result.labelAnnotations && result.labelAnnotations.length > 0
+            ? result.labelAnnotations.map(label => ({
+                description: label.description,
+                score: label.score,
+            }))
+            : [];
+
+        // Log parsed labels for debugging
+        console.log('Parsed Labels:', labels);
+
+        // Respond with analysis result
+        res.status(200).json({
+            message: 'Image analyzed successfully',
+            labels,
+        });
+
+        // Optionally, you can store the analysis back in MongoDB for future reference
+        post.analysis = labels; // Add a field `analysis` to your Post schema if needed
+        await post.save();
+
+    } catch (error) {
+        console.error('Error analyzing image:', error);
+        res.status(500).json({ error: 'Failed to analyze image' });
+    }
+});
+
 // Start the server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
-
-
