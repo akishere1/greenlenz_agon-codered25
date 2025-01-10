@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trash Reporter</title>
-    <link rel="stylesheet" href="../styles/admin.css">
+    <link rel="stylesheet" href="../styles/index.css">
 </head>
 <body>
     <header class="header">
@@ -19,80 +19,27 @@
     </main>
     
     <!-- "+" Button for Taking Photo -->
-    <div id="takePhoto" class="add-photo">
+    <div id="addPhoto" class="add-photo">
         <span class="plus-icon">+</span>
     </div>
 
-    <!-- Modal for taking photo (will not be visible until later) -->
+    <!-- Modal for taking photo -->
+    <div id="postSection" class="posts-container"></div>
+
+    <!-- Modal -->
     <div id="photoModal" class="modal">
         <div class="modal-content">
-            <button id="closeModal" class="close">×</button>
+            <span id="closeModal" class="close-btn">&times;</span> <!-- X Button -->
             <input type="file" id="photoInput" accept="image/*" capture="camera" />
             <textarea id="photoDescription" placeholder="Add a description..."></textarea>
             <button id="uploadBtn">Upload Photo</button>
         </div>
     </div>
+    
+    
 
-    <script>
-        // Open photo modal
-        document.getElementById('addPhoto').addEventListener('click', function () {
-            document.getElementById('photoModal').style.display = 'block';
-        });
-
-        // Close photo modal
-        document.getElementById('closeModal').addEventListener('click', function () {
-            document.getElementById('photoModal').style.display = 'none';
-        });
-
-        // Handle photo upload with geolocation
-        document.getElementById('uploadBtn').addEventListener('click', function () {
-            const photoInput = document.getElementById('photoInput');
-            const description = document.getElementById('photoDescription').value;
-            const photo = photoInput.files[0];
-
-            if (!photo) {
-                alert('Please select an image');
-                return;
-            }
-
-            // Get geolocation (latitude and longitude)
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
-
-                    // Prepare FormData with photo, description, and location
-                    const formData = new FormData();
-                    formData.append('photo', photo);
-                    formData.append('description', description);
-                    formData.append('location', JSON.stringify({ latitude, longitude }));
-
-                    // Send the data to the backend (Express route)
-                    fetch('/api/upload', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.message) {
-                            alert('Image uploaded successfully');
-                            // Optionally, reload the posts or display the uploaded image
-                        } else {
-                            alert('Error: ' + data.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error uploading image:', error);
-                        alert('Upload failed');
-                    });
-                }, function(error) {
-                    alert('Geolocation error: ' + error.message);
-                });
-            } else {
-                alert('Geolocation is not supported by this browser.');
-            }
-        });
-    </script>
-
+    <!-- Link to the external JS file -->
+    <script src="../scripts/photos.js"></script>
 </body>
 </html>
+
