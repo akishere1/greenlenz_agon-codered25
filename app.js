@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploaded files
 
-// Connect to MongoDB
+// MongoDB Connection
 mongoose.connect(process.env.DB_CONNECTION_STRING, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -40,6 +40,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
     res.render('index'); // Ensure "index.ejs" is in the "views" folder
 });
+
 app.get('/admin', (req, res) => {
     res.render('admin'); // Ensure "admin.ejs" is in the "views" folder
 });
@@ -73,6 +74,17 @@ app.post('/api/upload', upload.single('photo'), async (req, res) => {
         res.status(500).json({ error: 'Failed to upload photo' });
     }
 });
+// Assuming you're using Express
+app.get('/api/posts', async (req, res) => {
+    try {
+        const posts = await Post.find().sort({ createdAt: -1 }); // Get posts from MongoDB
+        res.json(posts); // Respond with the posts data as JSON
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        res.status(500).json({ error: 'Failed to fetch posts' });
+    }
+});
+
 
 // 2. Get All Posts
 app.get('/api/posts', async (req, res) => {
@@ -132,6 +144,26 @@ app.put('/api/posts/:id', async (req, res) => {
         res.status(500).json({ error: 'Failed to update post' });
     }
 });
+//
+// Assuming you're using Express and the Post model
+app.delete('/api/posts/:id', async (req, res) => {
+    try {
+        const postId = req.params.id;
+
+        // Delete the post from the database
+        const deletedPost = await Post.findByIdAndDelete(postId);
+
+        if (deletedPost) {
+            res.status(200).json({ message: 'Report resolved and deleted' });
+        } else {
+            res.status(404).json({ error: 'Post not found' });
+        }
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        res.status(500).json({ error: 'Failed to delete post' });
+    }
+});
+
 
 // 5. Delete Post
 app.delete('/api/posts/:id', async (req, res) => {
@@ -203,6 +235,17 @@ app.get('/api/analyze/:id', async (req, res) => {
     } catch (error) {
         console.error('Error analyzing image:', error);
         res.status(500).json({ error: 'Failed to analyze image' });
+    }
+});
+
+// Admin Dashboard Route
+app.get('/admin/dashboard', async (req, res) => {
+    try {
+        const posts = await Post.find().sort({ createdAt: -1 }); // Fetch posts sorted by latest
+        res.render('adminDashboard', { posts }); // Pass posts to EJS template
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        res.status(500).send('Failed to load posts.');
     }
 });
 

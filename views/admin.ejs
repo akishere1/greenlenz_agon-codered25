@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="../public/styles/admin.css">
+    <link rel="stylesheet" href="../styles/admin.css">
 </head>
 <body>
     <header class="header">
         <div class="logo">GreenLenz Admin</div>
         <nav class="nav">
-            <a href="/logout">Logout</a>
+            <a href="/">Logout</a>
         </nav>
     </header>
 
@@ -33,28 +33,87 @@
 
         <section class="report-list">
             <h2>Latest Reports</h2>
-            <table class="report-table">
+            <table class="report-table" id="reportTable">
                 <thead>
                     <tr>
-                        <th>Report ID</th>
+                        <th>Image</th>
                         <th>Description</th>
-                        <th>Status</th>
+                        <th>Created At</th>
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="reportRows">
-                    <!-- Dynamic content will be added here -->
-                    <tr>
-                        <td>12345</td>
-                        <td>Trash near park</td>
-                        <td>Pending</td>
-                        <td>
-                            <button class="resolve-btn">Resolve</button>
-                        </td>
-                    </tr>
+                <tbody>
+                    <!-- Reports will be populated here -->
                 </tbody>
             </table>
         </section>
     </main>
+
+    <script>
+        // Fetch data from the backend (GET request to /api/posts)
+        async function fetchReports() {
+            try {
+                const response = await fetch('/api/posts');
+                const posts = await response.json();
+                
+                // Update the Total Reports count
+                document.getElementById('totalReports').innerText = posts.length;
+
+                // Loop through each post and add to the table
+                const reportTable = document.getElementById('reportTable').getElementsByTagName('tbody')[0];
+                reportTable.innerHTML = ''; // Clear existing table data
+
+                posts.forEach(post => {
+                    const row = reportTable.insertRow();
+                    row.innerHTML = `
+                        <td><img src="${post.image}" alt="Post Image" style="width: 100px; height: auto;"></td>
+                        <td>${post.comment}</td>
+                        <td>${new Date(post.createdAt).toLocaleString()}</td>
+                        <td><button class="resolveBtn" data-id="${post._id}">Resolve</button></td>
+                    `;
+                });
+
+                // Add event listeners for Resolve buttons
+                const resolveButtons = document.querySelectorAll('.resolveBtn');
+                resolveButtons.forEach(button => {
+                    button.addEventListener('click', () => resolveReport(button.getAttribute('data-id')));
+                });
+
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+            }
+        }
+
+        // Handle the "Resolve" action
+        async function resolveReport(postId) {
+            try {
+                // Delete the post from the database via the API
+                const response = await fetch(`/api/posts/${postId}`, {
+                    method: 'DELETE',
+                });
+
+                if (response.ok) {
+                    // Remove the post from the UI
+                    const row = document.querySelector(`button[data-id="${postId}"]`).closest('tr');
+                    row.remove();
+
+                    // Update Total and Resolved Report counts
+                    const totalReports = parseInt(document.getElementById('totalReports').innerText);
+                    const resolvedReports = parseInt(document.getElementById('resolvedReports').innerText);
+
+                    document.getElementById('totalReports').innerText = totalReports - 1;
+                    document.getElementById('resolvedReports').innerText = resolvedReports + 1;
+                } else {
+                    alert('Failed to resolve the report');
+                }
+            } catch (error) {
+                console.error('Error resolving report:', error);
+            }
+        }
+
+        // Call the fetchReports function when the page loads
+        window.onload = fetchReports;
+    </script>
 </body>
 </html>
+

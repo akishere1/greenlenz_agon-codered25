@@ -1,126 +1,151 @@
-/* General Styles */
-body {
-    font-family: Arial, sans-serif;
+/* General Reset */
+* {
     margin: 0;
     padding: 0;
-    background-color: #f9f9f9;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
     color: #333;
 }
 
-/* Header */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #333;
-}
-
-.nav a {
-    text-decoration: none;
-    font-size: 1rem;
-    font-weight: bold;
-    color: lightgreen;
-}
-
-.nav a:hover {
-    color: #80c683;
-}
-
-/* Dashboard Container */
-.dashboard-container {
-    padding: 20px;
-    max-width: 1200px;
-    margin: auto;
-}
-
-.dashboard-container h1 {
+header {
+    background-color: #4CAF50; /* Green */
+    color: white;
+    padding: 15px 20px;
     text-align: center;
-    margin-bottom: 20px;
-    color: lightgreen;
 }
 
-/* Stats Section */
+header .logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+nav .nav {
+    margin-top: 10px;
+    text-align: center;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    margin: 0 10px;
+    background-color: #333;
+    border-radius: 5px;
+}
+
+nav a:hover {
+    background-color: #555;
+}
+
+/* Main dashboard container */
+.dashboard-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
 .stats-container {
     display: flex;
     justify-content: space-around;
     margin-bottom: 30px;
-    gap: 20px;
 }
 
 .stat-box {
-    background-color: white;
-    border-radius: 10px;
+    background-color: #f1f1f1;
     padding: 20px;
-    flex: 1;
+    border-radius: 8px;
+    width: 30%;
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .stat-box h2 {
-    font-size: 1.2rem;
+    font-size: 20px;
     margin-bottom: 10px;
-    color: #333;
 }
 
 .stat-box p {
-    font-size: 2rem;
+    font-size: 24px;
     font-weight: bold;
-    color: lightgreen;
+    color: #4CAF50;
 }
 
-/* Report List Section */
+/* Report list styling */
 .report-list {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.report-list h2 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-    color: #333;
+    margin-top: 40px;
 }
 
 .report-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
+    margin-top: 20px;
 }
 
-.report-table th,
-.report-table td {
+.report-table th, .report-table td {
+    padding: 12px 15px;
     text-align: left;
-    padding: 10px;
     border-bottom: 1px solid #ddd;
 }
 
 .report-table th {
-    background-color: lightgreen;
+    background-color: #4CAF50;
     color: white;
+    font-size: 16px;
 }
 
-.report-table tr:hover {
-    background-color: #f1f1f1;
+.report-table td {
+    font-size: 14px;
 }
 
-.resolve-btn {
-    background-color: lightgreen;
-    color: white;
-    padding: 5px 10px;
-    border: none;
+.report-table img {
+    max-width: 100px;
+    height: auto;
     border-radius: 5px;
-    cursor: pointer;
 }
 
-.resolve-btn:hover {
-    background-color: #80c683;
+.resolveBtn {
+    background-color: #e44d48;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.resolveBtn:hover {
+    background-color: #d43f41;
+}
+
+/* Mobile responsive */
+@media screen and (max-width: 768px) {
+    .stats-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stat-box {
+        width: 80%;
+        margin-bottom: 20px;
+    }
+
+    .report-table th, .report-table td {
+        font-size: 12px;
+        padding: 10px;
+    }
+
+    .report-table img {
+        max-width: 80px;
+    }
 }

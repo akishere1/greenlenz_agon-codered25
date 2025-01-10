@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema({
-    image: { type: String, required: true }, // File path or URL
-    comment: { type: String, required: true }, // Description
-    createdAt: { type: Date, default: Date.now }, // Timestamp
-}, { timestamps: true });
+    image: String,
+    comment: String,
+    createdAt: { type: Date, default: Date.now },
+});
 
-module.exports = mongoose.model('Post', postSchema);
+const Post = mongoose.model('Post', postSchema);
+module.exports = Post;
