@@ -1,11 +1,11 @@
 const express = require("express");
 const path = require("path");
 const multer = require("multer");
-require("dotenv").config(); // Load environment variables
+require("dotenv").config();
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const Grid = require("gridfs-stream");
-const { GridFsStorage } = require("multer-gridfs-storage");
+const { GridFSBucket } = require("mongodb");
+const { Readable } = require("stream");
 
 const app = express();
 
@@ -14,88 +14,114 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 
-// Middleware for parsing request bodies
+// Body parser middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// MongoDB connection setup
-const mongoURI = process.env.DB_CONNECTION_STRING;
+// Ensure DB_CONNECTION_STRING is defined in .env
+if (!process.env.DB_CONNECTION_STRING) {
+  console.error("DB_CONNECTION_STRING is not set in .env file.");
+  process.exit(1);
+}
 
+// MongoDB connection
+const mongoURI = process.env.DB_CONNECTION_STRING;
 const conn = mongoose.createConnection(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
-let gfs;
+// Ensure connection is established before proceeding
 conn.once("open", () => {
-  gfs = Grid(conn.db, mongoose.mongo);
-  gfs.collection("uploads");
+  console.log("🔥 MongoDB Atlas connected");
+  bucket = new GridFSBucket(conn.db, { bucketName: "uploads" });
+  gfs = conn.db.collection("uploads.files");
 });
 
-// Set up GridFS storage
-const storage = new GridFsStorage({
-  url: mongoURI,
-  file: (req, file) => {
-    return {
-      filename: `${Date.now()}-${file.originalname}`,
-      bucketName: "uploads",
-    };
+// Multer setup with validation for file type and size
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // Limit file size to 10MB
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed!"), false);
+    }
+    cb(null, true);
   },
 });
 
-const upload = multer({ storage });
-
-// Routes
+// Serve index.ejs
 app.get("/", (req, res) => {
-  res.render("index"); // Ensure "index.ejs" is in the "views" folder
-});
-app.get("/admin", (req, res) => {
-  res.render("admin"); // Ensure "admin.ejs" is in the "views" folder
-});
-app.get("/logout", (req, res) => {
-  res.render("index"); // Ensure "index.ejs" is in the "views" folder
+  res.render("index");
 });
 
-// Upload Route (Storing Image in MongoDB)
-app.post("/api/upload", upload.single("photo"), async (req, res) => {
+// ✅ File Upload Route (Using GridFSBucket)
+app.post("/upload", upload.single("file"), async (req, res) => {
+  if (!req.file) return res.status(400).send("No file uploaded.");
+
+  console.log("Received file:", req.file); // Log the uploaded file details
+
   try {
-    const { description, location } = req.body;
-    if (!req.file || !description || !location) {
-      return res.status(400).json({ error: "Photo, description, and location are required." });
-    }
+    const readableStream = new Readable();
+    readableStream.push(req.file.buffer);
+    readableStream.push(null);
 
-    const locationData = JSON.parse(location);
+    const uploadStream = bucket.openUploadStream(req.file.originalname);
+    readableStream.pipe(uploadStream);
 
-    res.status(201).json({
-      message: "Photo uploaded successfully!",
-      fileId: req.file.id, // File ID in MongoDB
-      filename: req.file.filename,
-      description,
-      location: {
-        latitude: locationData.latitude,
-        longitude: locationData.longitude,
-      },
+    uploadStream.on("finish", () => {
+      console.log(`File uploaded successfully with ID: ${uploadStream.id}`);
+      res.json({
+        message: "File uploaded successfully",
+        fileId: uploadStream.id,
+        filename: req.file.originalname,
+      });
     });
-  } catch (error) {
-    console.error("Error uploading file:", error);
-    res.status(500).json({ error: "Failed to upload image" });
+
+    uploadStream.on("error", (err) => {
+      console.error("Upload error:", err);
+      res.status(500).json({ error: "Upload failed.", details: err.message });
+    });
+  } catch (err) {
+    console.error("Error during file upload:", err);
+    res.status(500).json({ error: "Error during file upload.", details: err.message });
   }
 });
 
-// Retrieve Image by ID
-app.get("/api/image/:id", async (req, res) => {
+// ✅ Retrieve Image by ID
+app.get("/image/:id", async (req, res) => {
   try {
-    const file = await gfs.files.findOne({ _id: new mongoose.Types.ObjectId(req.params.id) });
-    if (!file) {
-      return res.status(404).json({ error: "File not found" });
-    }
+    const fileId = new mongoose.Types.ObjectId(req.params.id);
+    const file = await gfs.findOne({ _id: fileId });
 
-    const readStream = gfs.createReadStream(file.filename);
-    readStream.pipe(res);
-  } catch (error) {
-    console.error("Error retrieving image:", error);
-    res.status(500).json({ error: "Failed to retrieve image" });
+    if (!file) return res.status(404).send("File not found.");
+
+    const downloadStream = bucket.openDownloadStream(fileId);
+    res.set("Content-Type", file.contentType);
+    downloadStream.pipe(res);
+  } catch (err) {
+    console.error("Error retrieving image:", err);
+    res.status(500).json({ error: "Error retrieving image.", details: err.message });
   }
+});
+
+// Global error handling middleware
+app.use((err, req, res, next) => {
+  console.error("Error:", err.message);
+  if (err.name === "ValidationError") {
+    return res.status(400).json({ error: "Validation Error", details: err.message });
+  }
+  res.status(500).json({ error: "Something went wrong!", details: err.message });
+});
+
+// Graceful shutdown handling (to properly close DB connection)
+process.on("SIGINT", () => {
+  console.log("Gracefully shutting down...");
+  conn.close(() => {
+    console.log("MongoDB connection closed.");
+    process.exit(0);
+  });
 });
 
 // Start the server
